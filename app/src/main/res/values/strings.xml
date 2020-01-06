@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Messagerie</string>
+    <string name="send">Envoyer</string>
+    <string name="type_message">Tapez le message</string>
+    <string name="message">Message</string>
+    <string name="type_number">Entrez le numéro</string>
+    <string name="number">Numéro</string>
+</resources>

@@ -1,5 +1,14 @@
 package com.example.messagerie;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.widget.EditText;
+import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -23,6 +32,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
+        final EditText addnum = (EditText) findViewById(R.id.editTextNum);
+        addnum.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if(keyCode==KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP)
+                {
+                    EditText destNums = (EditText) findViewById(R.id.dests);
+                    destNums.append(addnum.getText().toString() + '\n');
+                    addnum.setText("");
+                    addnum.clearFocus();
+                    return true;
+                }
+                return false;
+            }
+        }
+
+    );
+
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -55,4 +86,35 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    static final int PICK_CONTACT_REQUEST = 1;
+
+    public void pickContact(View view) {
+        Intent pickContactIntent = new Intent(Intent.ACTION_PICK, Uri.parse("content://contacts"));
+        pickContactIntent.setType(Phone.CONTENT_TYPE); // Show user only contacts w/ phone numbers
+        startActivityForResult(pickContactIntent, PICK_CONTACT_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
+
+        if (requestCode == PICK_CONTACT_REQUEST) {
+
+            if (resultCode == RESULT_OK) {
+
+                Uri contactUri = resultIntent.getData();
+
+                String[] projection = {Phone.NUMBER};
+
+                Cursor cursor = getContentResolver().query(contactUri, projection, null, null, null);
+                cursor.moveToFirst();
+
+                int column = cursor.getColumnIndex(Phone.NUMBER);
+                String number = cursor.getString(column);
+
+                EditText destNums = (EditText) findViewById(R.id.dests);
+                destNums.append(number + '\n');
+            }
+        }
+    }
+
 }

@@ -6,6 +6,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.telephony.SmsManager;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import androidx.annotation.RequiresApi;
@@ -14,13 +15,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -31,6 +32,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,29 +63,25 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void sendSMS(View view) throws IOException {
 
-        Context context = getApplicationContext();
-        int duration = Toast.LENGTH_SHORT;
         double lng;
         double lat;
 
         EditText adressText = (EditText) findViewById(R.id.adress);
-        if(adressText.length()!=0)
-        {
+
+        if(adressText.length()!=0) {
 
             double[] coord = this.getLocationFromAddress(adressText.getText().toString());
-            lat=coord[0];
-            lng=coord[1];
-           // geoRDV(lng,lat);
+            lat = coord[0];
+            lng = coord[1];
 
-        }
-       else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
 
         } else {
             GPSTracker gps = new GPSTracker(this);
-            // check if GPS location can get Location
+            // Est-ce que le GPS peut avoir la localisation
             if (gps.canGetLocation()) {
 
                 LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -95,8 +93,14 @@ public class MainActivity extends AppCompatActivity {
                      lng = gps.getLongitude();
                      lat = gps.getLatitude();
 
-                    Toast.makeText(context, lng + " -- " + lat, duration).show();
-                 //   geoRDV(lng,lat);
+
+                    TextView numView = (TextView) findViewById(R.id.editTextNum);
+                    String num = numView.getText().toString();
+
+                     String message = "Vous avez une nouvelle invitation ! Pour y répondre suivez ce lien : " +
+                             "http://elojacquit.fr/map?num="+ num + "&latt="+ lat + "&long=" + lng;
+
+                     actionSendSMS(message, num);
                 }
             }
         }
@@ -131,18 +135,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //Lance google maps avec un marker sur les coordonnées
-    public void geoRDV(double lng, double lat) {
-        //Label du lieu  pas affiché avec les dernières version de Maps
-        Uri geoURI = Uri.parse("geo:0,0?q="+ Uri.encode(lat+","+lng+"(Lieu du rendez-vous)"));
-        Intent mapIntent = new Intent(Intent.ACTION_VIEW, geoURI);
-        mapIntent.setPackage("com.google.android.apps.maps");
-        if (mapIntent.resolveActivity(getPackageManager()) != null) {
-            startActivity(mapIntent);
-        }
-    }
 
-// Transforme une adresse en coordonnées
+
+    // Transforme une adresse en coordonnées
     public double[] getLocationFromAddress(String strAddress) throws IOException {
         Geocoder coder = new Geocoder(this,Locale.FRANCE);
         List<Address> address;
@@ -157,6 +152,27 @@ public class MainActivity extends AppCompatActivity {
             }
 
             return null;
+    }
+
+    // Vérifie le numéro et envoie un message
+    public void actionSendSMS(String message, String num) {
+
+        // Demande de permissions
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.SEND_SMS},
+                    MY_PERMISSIONS_REQUEST_SEND_SMS);
+
+        } else {
+            // Verification format numéro
+            if (num.matches("[0-9]+") && num.length() >= 4) {
+                SmsManager.getDefault().sendTextMessage(num, null, message, null, null);
+                Toast.makeText(MainActivity.this, "Message envoyé à " + num, Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(MainActivity.this, num + " : numéro invalide", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 }

@@ -29,17 +29,26 @@
                 android:hint="@string/type_number"/>
 
         <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPostalAddress"
+                android:ems="10"
+                android:id="@+id/adress"
+                android:hint="adresse du rendez-vous (si vide position actuelle)"/>
+        <EditText
                 android:id="@+id/dests"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="#E0E0E0"
                 android:hint="@string/dest_list"/>
+
         <Button
                 android:id="@+id/button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="sendSMS"
                 android:text="@string/send"/>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

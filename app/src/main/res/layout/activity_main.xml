@@ -8,24 +8,47 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <EditText
-            android:id="@+id/nums"
             android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:background="#E0E0E0"
-            android:hint="@string/type_number" />
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical" app:layout_constraintBottom_toBottomOf="parent"
+    >
 
         <Button
-            android:id="@+id/button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="sendSMS"
-            android:text="@string/send" />
+                android:text="@string/add_contact"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/button2"
+                android:onClick="pickContact"/>
+        <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="phone"
+                android:ems="10"
+                android:id="@+id/editTextNum"
+                android:hint="@string/type_number"/>
+
+        <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPostalAddress"
+                android:ems="10"
+                android:id="@+id/adress"
+                android:hint="adresse du rendez-vous (si vide position actuelle)"/>
+        <EditText
+                android:id="@+id/dests"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#E0E0E0"
+                android:hint="@string/dest_list"/>
+
+        <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="sendSMS"
+                android:text="@string/send"/>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

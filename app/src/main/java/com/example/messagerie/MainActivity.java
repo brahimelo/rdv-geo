@@ -67,51 +67,49 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void sendSMS(View view) throws IOException {
 
-        double lng;
-        double lat;
-
+        double lng=0;
+        double lat=0;
         EditText adressText = (EditText) findViewById(R.id.adress);
 
-        if(adressText.length()!=0) {
 
-            double[] coord = this.getLocationFromAddress(adressText.getText().toString());
-            lat = coord[0];
-            lng = coord[1];
-        }
             if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_PHONE_STATE},
                         MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
             } else {
-                GPSTracker gps = new GPSTracker(this);
-                // Est-ce que le GPS peut avoir la localisation
-                if (gps.canGetLocation()) {
 
-                    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                if (adressText.length() != 0) {
+                    double[] coord = this.getLocationFromAddress(adressText.getText().toString());
+                    lat = coord[0];
+                    lng = coord[1];
+                } else {
+                    GPSTracker gps = new GPSTracker(this);
+                    // Est-ce que le GPS peut avoir la localisation
+                    if (gps.canGetLocation()) {
 
-                    if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                        Log.d("Your Location", "latitude:" + gps.getLatitude()
-                                + ", longitude: " + gps.getLongitude());
+                        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-                        lng = gps.getLongitude();
-                        lat = gps.getLatitude();
+                        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                            Log.d("Your Location", "latitude:" + gps.getLatitude()
+                                    + ", longitude: " + gps.getLongitude());
 
-                        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-                        String phoneNum = tm.getLine1Number();
-
-                        TextView numsView = (TextView) findViewById(R.id.dests);
-                        String[] nums = numsView.getText().toString().split("\n");
-
-                        String message = "Vous avez une nouvelle invitation ! Pour y répondre suivez ce lien : " +
-                                "http://elojacquit.fr/map?num=" + phoneNum + "&latt=" + lat + "&long=" + lng;
-
-                        actionSendSMS(message, nums);
-
-
+                            lng = gps.getLongitude();
+                            lat = gps.getLatitude();
+                        }
                     }
                 }
-            }
 
+                TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                String phoneNum = tm.getLine1Number();
+
+                TextView numsView = (TextView) findViewById(R.id.dests);
+                String[] nums = numsView.getText().toString().split("\n");
+
+                String message = "Vous avez une nouvelle invitation ! Pour y répondre suivez ce lien : " +
+                        "http://elojacquit.fr/map?num=" + phoneNum + "&latt=" + lat + "&long=" + lng;
+
+                actionSendSMS(message, nums);
+            }
     }
     static final int PICK_CONTACT_REQUEST = 1;
 

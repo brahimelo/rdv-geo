@@ -1,5 +1,6 @@
 package com.example.messagerie;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.Address;
@@ -7,6 +8,7 @@ import android.location.Geocoder;
 import android.net.Uri;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.view.KeyEvent;
 import android.widget.EditText;
 import androidx.annotation.RequiresApi;
@@ -39,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        
+        // pour ajouter le numero manuellement
         final EditText addnumText = (EditText) findViewById(R.id.editTextNum);
         addnumText.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -73,37 +77,41 @@ public class MainActivity extends AppCompatActivity {
             double[] coord = this.getLocationFromAddress(adressText.getText().toString());
             lat = coord[0];
             lng = coord[1];
+        }
+            if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_PHONE_STATE},
+                        MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            } else {
+                GPSTracker gps = new GPSTracker(this);
+                // Est-ce que le GPS peut avoir la localisation
+                if (gps.canGetLocation()) {
 
-        } else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        } else {
-            GPSTracker gps = new GPSTracker(this);
-            // Est-ce que le GPS peut avoir la localisation
-            if (gps.canGetLocation()) {
+                    if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                        Log.d("Your Location", "latitude:" + gps.getLatitude()
+                                + ", longitude: " + gps.getLongitude());
 
-                LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                        lng = gps.getLongitude();
+                        lat = gps.getLatitude();
 
-                if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                    Log.d("Your Location", "latitude:" + gps.getLatitude()
-                            + ", longitude: " + gps.getLongitude());
+                        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+                        String phoneNum = tm.getLine1Number();
 
-                     lng = gps.getLongitude();
-                     lat = gps.getLatitude();
+                        TextView numsView = (TextView) findViewById(R.id.dests);
+                        String[] nums = numsView.getText().toString().split("\n");
+
+                        String message = "Vous avez une nouvelle invitation ! Pour y répondre suivez ce lien : " +
+                                "http://elojacquit.fr/map?num=" + phoneNum + "&latt=" + lat + "&long=" + lng;
+
+                        actionSendSMS(message, nums);
 
 
-                    TextView numView = (TextView) findViewById(R.id.editTextNum);
-                    String num = numView.getText().toString();
-
-                     String message = "Vous avez une nouvelle invitation ! Pour y répondre suivez ce lien : " +
-                             "http://elojacquit.fr/map?num="+ num + "&latt="+ lat + "&long=" + lng;
-
-                     actionSendSMS(message, num);
+                    }
                 }
             }
-        }
+
     }
     static final int PICK_CONTACT_REQUEST = 1;
 
@@ -155,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Vérifie le numéro et envoie un message
-    public void actionSendSMS(String message, String num) {
+    public void actionSendSMS(String message, String[] nums) {
 
         // Demande de permissions
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
@@ -165,12 +173,14 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
             // Verification format numéro
-            if (num.matches("[0-9]+") && num.length() >= 4) {
-                SmsManager.getDefault().sendTextMessage(num, null, message, null, null);
-                Toast.makeText(MainActivity.this, "Message envoyé à " + num, Toast.LENGTH_SHORT).show();
-            }
-            else {
-                Toast.makeText(MainActivity.this, num + " : numéro invalide", Toast.LENGTH_SHORT).show();
+            for (String num: nums) {
+                if (num.matches("^(0|\\+33)[-. ]?[1-9]([-. ]?[0-9]{2}){4}$")) {
+                    SmsManager.getDefault().sendTextMessage(num, null, message, null, null);
+                    Toast.makeText(MainActivity.this, "Message envoyé à " + num, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(MainActivity.this, num + " : numéro invalide", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }

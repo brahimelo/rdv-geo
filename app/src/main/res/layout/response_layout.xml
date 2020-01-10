@@ -27,16 +27,18 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/acceptInvitation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Accepter" />
+                android:id="@+id/acceptInvitation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Accepter"
+                android:onClick="sendAcceptation"/>
 
         <Button
-            android:id="@+id/denyInvitation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Refuser" />
+                android:id="@+id/denyInvitation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Refuser"
+                android:onClick="sendDiscard"/>
 
         <Button
             android:id="@+id/openGmap"

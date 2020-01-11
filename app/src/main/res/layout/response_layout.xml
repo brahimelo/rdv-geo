@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="RÉPONDRE"
+        android:text="Invation"
         android:textSize="50sp" />
 
     <TextView
@@ -16,8 +16,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="-"
-        android:textSize="30sp" />
+        android:text="Vous avez une nouvelle invitation, vous pouvez l'accepter ou la refuser "
+        android:textSize="24sp" />
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="385dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/acceptInvitation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="160dp"
+            android:onClick="sendAcceptation"
+            android:text="Accepter" />
+
+        <Button
+            android:id="@+id/denyInvitation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="150dp"
+            android:onClick="sendDiscard"
+            android:text="Refuser" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,24 +55,12 @@
         android:orientation="vertical">
 
         <Button
-                android:id="@+id/acceptInvitation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Accepter"
-                android:onClick="sendAcceptation"/>
-
-        <Button
-                android:id="@+id/denyInvitation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Refuser"
-                android:onClick="sendDiscard"/>
-
-        <Button
             android:id="@+id/openGmap"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:onClick="geoRDV"
-            android:text="Voir lieu sur la carte" />
+            android:text="Ouvrir le lieu sur GMap" />
+
     </LinearLayout>
 </LinearLayout>

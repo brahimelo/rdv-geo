@@ -28,8 +28,10 @@ import android.widget.Toast;
 
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         
-        // pour ajouter le numero manuellement
+        // Pour ajouter le numero manuellement
         final EditText addnumText = (EditText) findViewById(R.id.editTextNum);
         addnumText.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -60,12 +62,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public void sendSMS(View view) throws IOException {
+    public void sendSMS(View view) throws IOException, InterruptedException {
 
         double lng=0;
         double lat=0;
@@ -84,18 +84,24 @@ public class MainActivity extends AppCompatActivity {
                     lng = coord[1];
                 } else {
                     GPSTracker gps = new GPSTracker(this);
-                    // Est-ce que le GPS peut avoir la localisation
+
+
                     if (gps.canGetLocation()) {
 
+                        TimeUnit.SECONDS.sleep(1);
+
                         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
                         if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                            Log.d("Your Location", "latitude:" + gps.getLatitude()
-                                    + ", longitude: " + gps.getLongitude());
-
                             lng = gps.getLongitude();
                             lat = gps.getLatitude();
                         }
+
+                        while (lng == 0.0) {
+                            GPSTracker gpss = new GPSTracker(this);
+                            lng = gpss.getLongitude();
+                            lat = gpss.getLatitude();
+                        }
+
                     }
                 }
 
@@ -104,6 +110,12 @@ public class MainActivity extends AppCompatActivity {
 
                 TextView numsView = (TextView) findViewById(R.id.dests);
                 String[] nums = numsView.getText().toString().split("\n");
+
+                if (!checkGPSStatus(MainActivity.this) && (adressText.length() == 0)) {
+                    Toast.makeText(MainActivity.this, "Activez le GPS pour avoir votre localisation", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
 
                 String message = "Vous avez une nouvelle invitation ! Pour y répondre suivez ce lien : " +
                         "http://elojacquit.fr/map?num=" + phoneNum + "&latt=" + lat + "&long=" + lng;
@@ -177,10 +189,16 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Message envoyé à " + num, Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    Toast.makeText(MainActivity.this, num + " : numéro invalide", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Numéro invalide", Toast.LENGTH_SHORT).show();
                 }
             }
         }
     }
+
+    public static boolean checkGPSStatus(Context context){
+        LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE );
+        boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        return statusOfGPS;
+    };
 
 }

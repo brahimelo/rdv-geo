@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">Messagerie</string>
+    <string name="app_name">RDV - El Ouardani - Jacquit</string>
     <string name="send">Envoyer</string>
     <string name="type_message">Tapez le message</string>
     <string name="message">Message</string>
     <string name="type_number">Entrez un numéro</string>
     <string name="number">Numéro</string>
     <string name="dest_list">Liste des destinataires</string>
-    <string name="add_contact">Ajouter un destinataires</string>
+    <string name="add_contact">Contact</string>
 
 </resources>

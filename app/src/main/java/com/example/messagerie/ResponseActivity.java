@@ -16,7 +16,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-public class ResponseActivity extends AppCompatActivity {
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class ResponseActivity extends AppCompatActivity implements OnMapReadyCallback {
+
+    private MapView mapView;
+    private GoogleMap gmap;
+
+    private static final String MAP_VIEW_BUNDLE_KEY = "AIzaSyD0pAZ6Kn_PvYq2x8dGHphmgJPnqBhhAYw";
+
 
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     @Override
@@ -24,17 +37,21 @@ public class ResponseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.response_layout);
 
-        getIntent().getData();
 
+        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAP_VIEW_BUNDLE_KEY);
+        }
 
-        String num = getIntent().getData().getQueryParameter("num");
-        TextView coord = (TextView) findViewById(R.id.coord);
-        coord.setText(String.format("Répondre à +%s", num));
+        mapView = findViewById(R.id.mapView);
+        mapView.onCreate(mapViewBundle);
+        mapView.getMapAsync(this);
 
     }
 
     //Lance google maps avec un marker sur les coordonnées
     public void geoRDV(View view) {
+
         String lat = getIntent().getData().getQueryParameter("latt");
         String lng = getIntent().getData().getQueryParameter("long");
 
@@ -76,6 +93,68 @@ public class ResponseActivity extends AppCompatActivity {
             SmsManager.getDefault().sendTextMessage("+" + num, null, message, null, null);
             Toast.makeText(ResponseActivity.this, "Réponse envoyé" + num, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Bundle mapViewBundle = outState.getBundle(MAP_VIEW_BUNDLE_KEY);
+        if (mapViewBundle == null) {
+            mapViewBundle = new Bundle();
+            outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
+        }
+
+        mapView.onSaveInstanceState(mapViewBundle);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mapView.onStop();
+    }
+    @Override
+    protected void onPause() {
+        mapView.onPause();
+        super.onPause();
+    }
+    @Override
+    protected void onDestroy() {
+        mapView.onDestroy();
+        super.onDestroy();
+    }
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
+        String lat = getIntent().getData().getQueryParameter("latt");
+        String lng = getIntent().getData().getQueryParameter("long");
+
+        gmap = googleMap;
+        gmap.setMinZoomPreference(12);
+        LatLng ny = new LatLng(Double.valueOf(lat), Double.valueOf(lng));
+
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(ny);
+        gmap.addMarker(markerOptions);
+
+
+        gmap.moveCamera(CameraUpdateFactory.newLatLng(ny));
     }
 
 }
